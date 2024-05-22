@@ -4,18 +4,19 @@ import matplotlib.pyplot as plt
 from fillipov import fillipov, filippovfunc
 
 
-def vdp1(t, y):
-    return [y[1], (1 - y[0] ** 2) * y[1] - y[0]]
-
-
-def jacobians(t, y, params, str):
+def jacobians(
+    t,
+    y,
+    params,
+):
     # Распаковка параметров
-    z, w, s, l = params
+    # z, w, s, l = params
 
     # Якобиан в области S1 (H(x) > 0)
-    J1 = np.array(
-        [[-(2 * z * w + l), 1, 0], [-(2 * z * l * w + w * w), 0, 1], [-l * w * w, 0, 0]]
-    )
+    # J1 = np.array(
+    #     [[-(2 * z * w + l), 1, 0], [-(2 * z * l * w + w * w), 0, 1], [-l * w * w, 0, 0]]
+    # )
+    J1 = np.array([[0, 1, 0], [-1, 0, np.cos(y[2])], [0, 0, 0]])
 
     # Якобиан в области S2 (H(x) < 0)
     J2 = J1
@@ -26,41 +27,47 @@ def jacobians(t, y, params, str):
     return J1, J2, d2H
 
 
-def vectorfields(t, y, params, str):
+def vectorfields(t, y, params):
     # Распаковка параметров
-    z, w, s, l = params
+    # z, w, s, l = params
+    F, omega = params
 
     # Векторное поле в области 1 - H(x) > 0
-    F1 = np.array(
-        [
-            -(2 * z * w + l) * y[0] + y[1] - 1,
-            -(2 * z * w * l + w * w) * y[0] + y[2] - 2 * s,
-            -l * w * w * y[0] - 1,
-        ]
-    )
+    # F1 = np.array(
+    #     [
+    #         -(2 * z * w + l) * y[0] + y[1] - 1,
+    #         -(2 * z * w * l + w * w) * y[0] + y[2] - 2 * s,
+    #         -l * w * w * y[0] - 1,
+    #     ]
+    # )
+    F1 = np.array([y[1], -y[0] + np.sin(y[2]) - F, omega])
 
     # Векторное поле в области 2 - H(x) < 0
-    F2 = np.array(
-        [
-            -(2 * z * w + l) * y[0] + y[1] + 1,
-            -(2 * z * w * l + w * w) * y[0] + y[2] + 2 * s,
-            -l * w * w * y[0] + 1,
-        ]
-    )
-
+    # F2 = np.array(
+    #     [
+    #         -(2 * z * w + l) * y[0] + y[1] + 1,
+    #         -(2 * z * w * l + w * w) * y[0] + y[2] + 2 * s,
+    #         -l * w * w * y[0] + 1,
+    #     ]
+    # )
+    F2 = np.array([y[1], -y[0] + np.sin(y[2]) + F, omega])
     # Переключающее многообразие
-    H = y[0]
+    H = y[1]
 
     # Вектор нормали к переключающему многообразию
-    dH = np.array([1, 0, 0])
+    dH = np.array([0, 1, 0])
 
     # Плоскость Пуанкаре
-    h = 1
+    h = y[2] - 2 * np.pi
 
     # Направление расположения
-    dir = 1
+    hdir = 1
 
-    return F1, F2, H, dH, h, dir
+    return F1, F2, H, dH, h, hdir
+
+
+def pfunction(t, y, params):
+    return np.array([y[0], y[1], 0])
 
 
 if __name__ == "__main__":
@@ -68,22 +75,25 @@ if __name__ == "__main__":
     w = 25
     s = -1
     l = 1
-    params = [z, w, s, l]
+    # params = [z, w, s, l]
+    F = 0.4
+    omega = 1 / 3
+    params = [F, omega]
 
     # Начальные условия
-    y0 = [0.05, -0.01, 0.1]
+    # y0 = [0.05, -0.01, 0.1]
+    y0 = [1, 2, 0]
 
     # Время интеграции
-    T = 10
+    T = 2 * np.pi / omega * 10
     t_span = [0, T]
-    t0 = t_span[0]
+
     options = {"atol": 1e-10, "rtol": 1e-10}
 
     t, y, te, ye, ie, se = fillipov(
         vfields=vectorfields,
         jacobians=jacobians,
-        pfunction=None,
-        solver="",
+        pfunction=pfunction,
         tspan=t_span,
         y0=y0,
         params=params,
@@ -93,8 +103,11 @@ if __name__ == "__main__":
     print("y = ", y)
     fig = plt.figure(101)
     ax = fig.add_subplot(111, projection="3d")
+    ax2 = fig.add_subplot(111)
 
     ax.plot(y[:, 1], y[:, 2], y[:, 0], "r-", markersize=1)
+    ax2.plot(t, y[:, 0], "r-", markersize=1)
+
     ax.set_xlabel("y_2")
     ax.set_ylabel("y_3")
     ax.set_zlabel("y_1")

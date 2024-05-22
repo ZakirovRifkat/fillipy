@@ -21,7 +21,7 @@ def get_events_number(yEvents):
 
 
 def events_direction(t, y, vfields, jacobians, params, state, dir):
-    F1, F2, H, dH, h, hdir = vfields(t, y, params, "")
+    F1, F2, H, dH, h, hdir = vfields(t, y, params)
     direction = np.copy(np.append(dir, hdir))
     event0.direction = direction[0]
     event1.direction = direction[1]
@@ -32,7 +32,7 @@ def events_direction(t, y, vfields, jacobians, params, state, dir):
         direction[0] = -state[0]
         event0.direction = -state[0]
  
-def fillipov(vfields, jacobians, pfunction, solver, tspan, y0, params, C, inopts):
+def fillipov(vfields, jacobians, pfunction, tspan, y0, params, C, inopts):
     t0 = tspan[0]
     t1 = tspan[-1]
 
@@ -79,11 +79,14 @@ def fillipov(vfields, jacobians, pfunction, solver, tspan, y0, params, C, inopts
         
         yvect = np.array(yvect_list)
         tvect = np.append(tvect, t)
-        if IE:
+        print("IE = ", IE)
+        
+        if len(IE) != 0:
             te = np.append(te, TE[IE[0]-1])
             ye = np.append(ye, YE[IE[0]-1])
+            
         tspan = np.array([t[-1], t1])
-        if IE and (t[-1] != t1):
+        if len(IE) != 0 and (t[-1] != t1):
             for k in range(len(IE)):
                 ie = np.append(ie, IE[k])
                 if IE[k] == 4:
@@ -163,7 +166,7 @@ def findstate(vfields, jacobians, t0, y0, params):
         h1 - число = 1
         hdir - число = 1 
     """
-    F1, F2, H, dH, h1, hdir = vfields(t0, y0, params, "")
+    F1, F2, H, dH, h1, hdir = vfields(t0, y0, params)
 
     dHF1 = np.dot(dH, F1)
     dHF2 = np.dot(dH, F2)
@@ -193,7 +196,7 @@ def findstate(vfields, jacobians, t0, y0, params):
             """
                 Тут все вектора
             """
-            J1, J2, d2H = jacobians(t0, y0, params, "")
+            J1, J2, d2H = jacobians(t0, y0, params)
 
             if dHF1 == 0:
                 HxF1x_F1Hxx = dH * J1 + F1.T * d2H
@@ -230,7 +233,7 @@ def fevents(t, y, vfields, jacobians, params, C, state, dir):
     print("t = ", t)
     print("y = ", y)
 
-    F1, F2, H, dH, h, hdir = vfields(t, y, params, '')
+    F1, F2, H, dH, h, hdir = vfields(t, y, params)
 
     dHF1 = dH @ F1
     dHF2 = dH @ F2
@@ -250,7 +253,7 @@ def fevents(t, y, vfields, jacobians, params, C, state, dir):
             """
                 Тут все вектора
             """
-            J1, J2, d2H = jacobians(t, y, params, "")
+            J1, J2, d2H = jacobians(t, y, params)
             
             dHF1_p_dHF2 = dHF1 + dHF2
             dHF2_dHF1 = dHF2 - dHF1
@@ -301,7 +304,7 @@ def filippovfunc(t, y, vfields, jacobians, params, C, state, dir):
         h1 - число = 1
         hdir - число = 1 
     """
-    F1, F2, H, dH, h1, hdir = vfields(t, y, params, '')
+    F1, F2, H, dH, h1, hdir = vfields(t, y, params)
     
     events_direction(t,y,vfields, jacobians, params, state, dir)
     if state[0] == 1:

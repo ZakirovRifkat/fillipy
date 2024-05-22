@@ -3,7 +3,7 @@ import numpy as np
 
 def event0(t, y, vfields, jacobians, params, C, state, dir):
 
-    F1, F2, H, dH, h, hdir = vfields(t, y, params, "")
+    F1, F2, H, dH, h, hdir = vfields(t, y, params)
 
     value = H
     if state[0] == 1 or state[1] == 1:
@@ -17,7 +17,7 @@ def event0(t, y, vfields, jacobians, params, C, state, dir):
 
 
 def event1(t, y, vfields, jacobians, params, C, state, dir):
-    F1, F2, H, dH, h, hdir = vfields(t, y, params, "")
+    F1, F2, H, dH, h, hdir = vfields(t, y, params)
 
     dHF1 = dH @ F1
 
@@ -33,7 +33,7 @@ def event1(t, y, vfields, jacobians, params, C, state, dir):
 
 
 def event2(t, y, vfields, jacobians, params, C, state, dir):
-    F1, F2, H, dH, h, hdir = vfields(t, y, params, "")
+    F1, F2, H, dH, h, hdir = vfields(t, y, params)
 
     dHF2 = dH @ F2
 
@@ -49,7 +49,7 @@ def event2(t, y, vfields, jacobians, params, C, state, dir):
 
 
 def event3(t, y, vfields, jacobians, params, C, state, dir):
-    F1, F2, H, dH, h, hdir = vfields(t, y, params, "")
+    F1, F2, H, dH, h, hdir = vfields(t, y, params)
 
     value = h
     if state[0] == 1 or state[1] == 1:
@@ -63,7 +63,7 @@ def event3(t, y, vfields, jacobians, params, C, state, dir):
 
 
 def event4(t, y, vfields, jacobians, params, C, state, dir):
-    F1, F2, H, dH, h, hdir = vfields(t, y, params, "")
+    F1, F2, H, dH, h, hdir = vfields(t, y, params)
 
     dHF1 = dH @ F1
     dHF2 = dH @ F2
@@ -76,7 +76,7 @@ def event4(t, y, vfields, jacobians, params, C, state, dir):
         if jacobians is None:
             value = 1
         else:
-            J1, J2, d2H = jacobians(t, y, params, "")
+            J1, J2, d2H = jacobians(t, y, params)
 
             dHF1_p_dHF2 = dHF1 + dHF2
             dHF2_dHF1 = dHF2 - dHF1
