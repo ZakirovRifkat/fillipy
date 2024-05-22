@@ -12,7 +12,6 @@ def event0(t, y, vfields, jacobians, params, C, state, dir):
         value = 1
     else:
         raise ("ERROR: Wrong event in filippov:event0")
-
     return value
 
 

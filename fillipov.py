@@ -48,7 +48,8 @@ def fillipov(vfields, jacobians, pfunction, tspan, y0, params, C, inopts):
     
     stopit = False
     a = 0
-    
+    prev_IE = 0
+    amount = 0
     while not stopit:
         
         # TODO: Вот тут вылезут ошибки, скорее всего
@@ -63,7 +64,14 @@ def fillipov(vfields, jacobians, pfunction, tspan, y0, params, C, inopts):
         TE = sol.t_events
         YE = sol.y_events
         IE = get_events_number(sol.t_events)
-        
+        if(len(IE) == 1 and prev_IE == IE[0]):
+            amount +=1
+        else:
+            amount == 0
+        if(len(IE)!=0):
+            prev_IE = IE[0]
+        if(amount > 100):
+            raise("ERROR IN SYSTEM!!!")
         # print("t_events = ", TE)
         # print("y_events = ", YE)
         # print("IE = ", IE)
@@ -80,7 +88,6 @@ def fillipov(vfields, jacobians, pfunction, tspan, y0, params, C, inopts):
         yvect = np.array(yvect_list)
         tvect = np.append(tvect, t)
         print("IE = ", IE)
-        
         if len(IE) != 0:
             te = np.append(te, TE[IE[0]-1])
             ye = np.append(ye, YE[IE[0]-1])
@@ -199,13 +206,13 @@ def findstate(vfields, jacobians, t0, y0, params):
             J1, J2, d2H = jacobians(t0, y0, params)
 
             if dHF1 == 0:
-                HxF1x_F1Hxx = dH * J1 + F1.T * d2H
-                sig = np.sign(HxF1x_F1Hxx * F1) * np.sign(dHF2)
-                dir[1] = -np.sign(HxF1x_F1Hxx * F1)
+                HxF1x_F1Hxx = dH @ J1 + F1.T @ d2H
+                sig = np.sign(HxF1x_F1Hxx @ F1) * np.sign(dHF2)
+                dir[1] = -np.sign(HxF1x_F1Hxx @ F1)
             elif dHF2 == 0:
-                HxF2x_F2Hxx = dH * J2 + F2.T * d2H
-                sig = np.sign(HxF2x_F2Hxx * F2) * np.sign(dHF1)
-                dir[2] = -np.sign(HxF2x_F2Hxx * F2)
+                HxF2x_F2Hxx = dH @ J2 + F2.T @ d2H
+                sig = np.sign(HxF2x_F2Hxx @ F2) * np.sign(dHF1)
+                dir[2] = -np.sign(HxF2x_F2Hxx @ F2)
             else:
                 sig = 1
                 raise('ERROR: Something is wrong in filippov:findstate')
